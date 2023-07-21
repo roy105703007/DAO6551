@@ -1,0 +1,13 @@
+@jbx-protocol/=node_modules/@jbx-protocol/
+@openzeppelin/=node_modules/@openzeppelin/
+@paulrberg/=node_modules/@paulrberg/
+base64-sol/=node_modules/base64-sol/
+ds-test/=lib/ds-test/src/
+forge-std/=lib/forge-std/src/
+juice-token-resolver/=lib/juice-token-resolver/
+openzeppelin-contracts/=lib/reference/lib/openzeppelin-contracts/
+prb-math/=node_modules/prb-math/
+reference/=lib/reference/
+solcolor/=lib/juice-token-resolver/lib/solcolor/
+sstore2/=lib/reference/lib/sstore2/contracts/
+typeface/=lib/juice-token-resolver/lib/typeface/contracts/
