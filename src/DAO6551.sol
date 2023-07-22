@@ -4,15 +4,16 @@ pragma solidity ^0.8.19;
 import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "reference/src/lib/ERC6551AccountLib.sol";
 import "reference/src/interfaces/IERC6551Registry.sol";
 import "juice-token-resolver/src/Libraries/StringSlicer.sol";
 
-/// @title PiggybankNFT
-/// @notice An NFT piggybank that accepts ETH.
-/// @dev An ERC-721 NFT piggybank implementation.
-/// @author nnnnicholas
-contract PiggybankNFT is ERC721 {
+/// @title DAO6551
+/// @notice An DAO that members consist of abstract accounts.
+/// @dev An ERC-721 NFT implementation which can mint SBT as the role of DAO.
+/// @author web3roy
+contract DAO6551 is ERC721 {
     using Strings for uint256; // Turns uints into strings
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -34,16 +35,16 @@ contract PiggybankNFT is ERC721 {
         address _registry,
         uint _maxSupply,
         uint _price
-    ) ERC721("PiggybankNFT", "PIGGY") {
+    ) ERC721("DAO6551", "DAO6551") {
         implementation = _implementation;
         registry = IERC6551Registry(_registry);
         maxSupply = _maxSupply;
         price = _price;
     }
 
-    /*//////////////////////////////////////////////////////////////
-                               FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
+    /**************************/
+    /**** Abstract Account ****/
+    /**************************/
 
     function getAccount(uint tokenId) public view returns (address) {
         return
@@ -68,16 +69,16 @@ contract PiggybankNFT is ERC721 {
             );
     }
 
-    function addEth(uint tokenId) external payable {
-        address account = getAccount(tokenId);
-        (bool success, ) = account.call{value: msg.value}("");
-        require(success, "Failed to send ETH");
-    }
-
     function mint() external payable {
         require(totalSupply < maxSupply, "Max supply reached");
         require(msg.value >= price, "Insufficient funds");
         _safeMint(msg.sender, ++totalSupply);
+    }
+
+    function addEth(uint tokenId) external payable {
+        address account = getAccount(tokenId);
+        (bool success, ) = account.call{value: msg.value}("");
+        require(success, "Failed to send ETH");
     }
 
     /**
@@ -173,36 +174,5 @@ contract PiggybankNFT is ERC721 {
         );
 
         return uri;
-    }
-
-    function burn(uint256 tokenId) external virtual {
-        require(
-            _isApprovedOrOwner(_msgSender(), tokenId),
-            "ERC721: transfer caller is not owner nor approved"
-        );
-
-        address owner = ownerOf(tokenId);
-
-        _beforeTokenTransfer(owner, address(0), tokenId, 1);
-
-        // Update ownership in case tokenId was transferred by `_beforeTokenTransfer` hook
-        owner = ownerOf(tokenId);
-
-        // Clear approvals
-        // Should implement a function that zeroes out token approvals in the 721 contract -- because we can't access the _tokenApprovals array from this contract.
-        //    function removeTokenApprovals(uint tokenId) public virtual {
-        //   require(
-        //     _isApprovedOrOwner(_msgSender(), tokenId),
-        //   "ERC721: transfer caller is not owner nor approved"
-        // );
-        // delete _tokenApprovals[tokenId];
-
-        // Get the account address
-        address account = createAccount(tokenId);
-
-        // Burn the account by sending the NFT to its own account address
-        safeTransferFrom(owner, account, tokenId);
-
-        _afterTokenTransfer(owner, address(0), tokenId, 1);
     }
 }
