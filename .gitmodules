@@ -10,3 +10,6 @@
 [submodule "lib/juice-token-resolver"]
 	path = lib/juice-token-resolver
 	url = https://github.com/jbx-protocol/juice-token-resolver
+[submodule "lib/forge-safe"]
+	path = lib/forge-safe
+	url = https://github.com/ind-igo/forge-safe
