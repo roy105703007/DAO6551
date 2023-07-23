@@ -32,6 +32,8 @@ contract DeployScript is Script {
             address(sbtc)
         );
         sbta.transferOwnership(address(dao6551));
+        sbtb.transferOwnership(address(dao6551));
+        sbtc.transferOwnership(address(dao6551));
 
         vm.stopBroadcast();
     }

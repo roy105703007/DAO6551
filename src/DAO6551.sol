@@ -32,6 +32,10 @@ contract DAO6551 is ERC721 {
     uint public immutable maxSupply; // The maximum number of tokens that can be minted on this contract
     uint public immutable price;
 
+    uint a;
+    uint b;
+    uint c;
+
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
@@ -89,17 +93,20 @@ contract DAO6551 is ERC721 {
 
     function getRoleA(uint tokenId) external payable {
         require(msg.value >= price, "Insufficient funds");
-        sbta.safeMint(getAccount(tokenId));
+        sbta.mint(getAccount(tokenId));
+        a++;
     }
 
     function getRoleB(uint tokenId) external payable {
         require(msg.value >= price, "Insufficient funds");
-        sbtb.safeMint(getAccount(tokenId));
+        sbtb.mint(getAccount(tokenId));
+        b++;
     }
 
     function getRoleC(uint tokenId) external payable {
         require(msg.value >= price, "Insufficient funds");
-        sbtc.safeMint(getAccount(tokenId));
+        sbtc.mint(getAccount(tokenId));
+        c++;
     }
 
     function addEth(uint tokenId) external payable {
@@ -119,17 +126,21 @@ contract DAO6551 is ERC721 {
         string[] memory uriParts = new string[](4);
         string memory balance = "0";
         string memory ethBalanceTwoDecimals = "0";
-        if (address(account).balance > 0) {
-            balance = (address(account).balance / 10 ** 16).toString();
-            ethBalanceTwoDecimals = string.concat(
-                StringSlicer.slice(balance, 0, bytes(balance).length - 2),
-                ".",
-                StringSlicer.slice(
-                    balance,
-                    bytes(balance).length - 2,
-                    bytes(balance).length
-                )
-            );
+        string memory roleship = "none";
+        if (IERC721(address(sbta)).balanceOf(account) > 0) {
+            roleship = "Admin";
+        }
+        if (IERC721(address(sbtb)).balanceOf(account) > 0) {
+            roleship = "Developer";
+        }
+        if (IERC721(address(sbtc)).balanceOf(account) > 0) {
+            roleship = "Contributor";
+        }
+        if (
+            IERC721(address(sbtb)).balanceOf(account) > 0 &&
+            IERC721(address(sbtc)).balanceOf(account) > 0
+        ) {
+            roleship = "Developer, Contributor";
         }
         if (ownerOf(tokenId) == account) {
             uriParts[0] = string("data:application/json;base64,");
@@ -177,15 +188,14 @@ contract DAO6551 is ERC721 {
                     '<rect width="1000" height="1000" fill="hsl(',
                     (address(account).balance / 10 ** 17).toString(),
                     ', 78%, 56%)"/>',
-                    '<text x="80" y="276" fill="white" font-family="Helvetica" font-size="130" font-weight="bold">',
+                    '<text x="80" y="276" fill="white" font-family="Helvetica" font-size="70" font-weight="bold">',
                     "DAO6551 #",
                     tokenId.toString(),
                     "</text>",
-                    '<text x="80" y="425" fill="white" font-family="Helvetica" font-size="130" font-weight="bold">',
-                    " contains </text>",
-                    '<text x="80" y="574" fill="white" font-family="Helvetica" font-size="130" font-weight="bold">',
-                    ethBalanceTwoDecimals,
-                    " ETH",
+                    '<text x="80" y="425" fill="white" font-family="Helvetica" font-size="70" font-weight="bold">',
+                    " contains role: </text>",
+                    '<text x="80" y="574" fill="white" font-family="Helvetica" font-size="70" font-weight="bold">',
+                    roleship,
                     "</text>",
                     "</svg>"
                 )
