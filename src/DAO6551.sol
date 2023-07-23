@@ -32,10 +32,6 @@ contract DAO6551 is ERC721 {
     uint public immutable maxSupply; // The maximum number of tokens that can be minted on this contract
     uint public immutable price;
 
-    uint a;
-    uint b;
-    uint c;
-
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
@@ -94,19 +90,16 @@ contract DAO6551 is ERC721 {
     function getRoleA(uint tokenId) external payable {
         require(msg.value >= price, "Insufficient funds");
         sbta.mint(getAccount(tokenId));
-        a++;
     }
 
     function getRoleB(uint tokenId) external payable {
         require(msg.value >= price, "Insufficient funds");
         sbtb.mint(getAccount(tokenId));
-        b++;
     }
 
     function getRoleC(uint tokenId) external payable {
         require(msg.value >= price, "Insufficient funds");
         sbtc.mint(getAccount(tokenId));
-        c++;
     }
 
     function addEth(uint tokenId) external payable {
@@ -127,19 +120,16 @@ contract DAO6551 is ERC721 {
         string memory balance = "0";
         string memory ethBalanceTwoDecimals = "0";
         string memory roleship = "none";
-        if (IERC721(address(sbta)).balanceOf(account) > 0) {
+        if (sbta.balanceOf(account) > 0) {
             roleship = "Admin";
         }
-        if (IERC721(address(sbtb)).balanceOf(account) > 0) {
+        if (sbtb.balanceOf(account) > 0) {
             roleship = "Developer";
         }
-        if (IERC721(address(sbtc)).balanceOf(account) > 0) {
+        if (sbtc.balanceOf(account) > 0) {
             roleship = "Contributor";
         }
-        if (
-            IERC721(address(sbtb)).balanceOf(account) > 0 &&
-            IERC721(address(sbtc)).balanceOf(account) > 0
-        ) {
+        if (sbtb.balanceOf(account) > 0 && sbtc.balanceOf(account) > 0) {
             roleship = "Developer, Contributor";
         }
         if (ownerOf(tokenId) == account) {
