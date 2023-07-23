@@ -4,16 +4,21 @@ pragma solidity ^0.8.19;
 import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "reference/src/lib/ERC6551AccountLib.sol";
 import "reference/src/interfaces/IERC6551Registry.sol";
 import "juice-token-resolver/src/Libraries/StringSlicer.sol";
+import "./interfaces/ISBTofRole.sol";
 
 /// @title DAO6551
 /// @notice An DAO that members consist of abstract accounts.
 /// @dev An ERC-721 NFT implementation which can mint SBT as the role of DAO.
 /// @author web3roy
 contract DAO6551 is ERC721 {
+    ISBTofRole public immutable sbta;
+    ISBTofRole public immutable sbtb;
+    ISBTofRole public immutable sbtc;
     using Strings for uint256; // Turns uints into strings
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -34,12 +39,18 @@ contract DAO6551 is ERC721 {
         address _implementation,
         address _registry,
         uint _maxSupply,
-        uint _price
+        uint _price,
+        address _sbta,
+        address _sbtb,
+        address _sbtc
     ) ERC721("DAO6551", "DAO6551") {
         implementation = _implementation;
         registry = IERC6551Registry(_registry);
         maxSupply = _maxSupply;
         price = _price;
+        sbta = ISBTofRole(_sbta);
+        sbtb = ISBTofRole(_sbtb);
+        sbtc = ISBTofRole(_sbtc);
     }
 
     /**************************/
@@ -69,10 +80,26 @@ contract DAO6551 is ERC721 {
             );
     }
 
-    function mint() external payable {
+    function mint() external payable returns (uint256) {
         require(totalSupply < maxSupply, "Max supply reached");
         require(msg.value >= price, "Insufficient funds");
         _safeMint(msg.sender, ++totalSupply);
+        return totalSupply;
+    }
+
+    function getRoleA(uint tokenId) external payable {
+        require(msg.value >= price, "Insufficient funds");
+        sbta.safeMint(getAccount(tokenId));
+    }
+
+    function getRoleB(uint tokenId) external payable {
+        require(msg.value >= price, "Insufficient funds");
+        sbtb.safeMint(getAccount(tokenId));
+    }
+
+    function getRoleC(uint tokenId) external payable {
+        require(msg.value >= price, "Insufficient funds");
+        sbtc.safeMint(getAccount(tokenId));
     }
 
     function addEth(uint tokenId) external payable {
@@ -108,10 +135,10 @@ contract DAO6551 is ERC721 {
             uriParts[0] = string("data:application/json;base64,");
             uriParts[1] = string(
                 abi.encodePacked(
-                    '{"name":"Piggybank #',
+                    '{"name":"DAO6551 #',
                     tokenId.toString(),
                     ' (Burned)",',
-                    '"description":"Piggybanks are NFT owned accounts (6551) that accept ETH and only return it when burned. Burned NFTs are sent to their own 6551 addresses, making them ",',
+                    '"description":"DAO6551 ",',
                     '"attributes":[{"trait_type":"Balance","value":"0"},{"trait_type":"Status","value":"Burned"}],',
                     '"image":"data:image/svg+xml;base64,'
                 )
@@ -121,11 +148,11 @@ contract DAO6551 is ERC721 {
                     '<svg width="1000" height="1000" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">',
                     '<rect width="1000" height="1000" fill="black"/>',
                     '<text x="80" y="276" fill="white" font-family="Helvetica" font-size="130" font-weight="bold">',
-                    "Piggybank #",
+                    "DAO6551 #",
                     tokenId.toString(),
                     "</text>",
                     '<text x="80" y="425" fill="white" font-family="Helvetica" font-size="130" font-weight="bold">',
-                    " is burned </text>",
+                    " activity </text>",
                     "</svg>"
                 )
             );
@@ -134,10 +161,10 @@ contract DAO6551 is ERC721 {
             uriParts[0] = string("data:application/json;base64,");
             uriParts[1] = string(
                 abi.encodePacked(
-                    '{"name":"Piggybank #',
+                    '{"name":"DAO6551 #',
                     tokenId.toString(),
                     '",',
-                    '"description":"Piggybanks are NFT owned accounts (6551) that accept ETH and only return it when burned. Burned NFTs are sent to their own 6551 addresses, making them ",',
+                    '"description":"DAO6551 ",',
                     '"attributes":[{"trait_type":"Balance","value":"',
                     ethBalanceTwoDecimals,
                     ' ETH"},{"trait_type":"Status","value":"Exists"}],',
@@ -151,7 +178,7 @@ contract DAO6551 is ERC721 {
                     (address(account).balance / 10 ** 17).toString(),
                     ', 78%, 56%)"/>',
                     '<text x="80" y="276" fill="white" font-family="Helvetica" font-size="130" font-weight="bold">',
-                    "Piggybank #",
+                    "DAO6551 #",
                     tokenId.toString(),
                     "</text>",
                     '<text x="80" y="425" fill="white" font-family="Helvetica" font-size="130" font-weight="bold">',

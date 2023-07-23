@@ -11,10 +11,10 @@ contract DeployRegistry is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        new ERC6551Registry{
-            salt: 0x6551655165516551655165516551655165516551655165516551655165516551
-        }();
-
+        // new ERC6551Registry{
+        //     salt: 0x6551655165516551655165516551655165516551655165516551655165516551
+        // }();
+        new ERC6551Registry();
         vm.stopBroadcast();
     }
 }
